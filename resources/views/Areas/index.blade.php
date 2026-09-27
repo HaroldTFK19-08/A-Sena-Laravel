@@ -1,0 +1,11 @@
+@extends('Layouts.Usuarios.AppAdmin')
+@section('titulo', 'Áreas de Formación')
+@section('contenido')
+	@include('Areas.partials.styles')
+<div class="space-y-8">
+<section class="admin-hero"><div><p class="admin-eyebrow">Gestión institucional</p><h1 class="admin-title">Áreas de Formación</h1><p class="admin-description">Organiza las áreas académicas asociadas a cada centro de formación.</p></div><a href="{{ route('areas.create') }}" class="admin-primary">+ Nueva área</a></section>
+@if(session('success'))<div class="admin-success">{{ session('success') }}</div>@endif
+<section class="grid gap-5 md:grid-cols-3"><div class="admin-stat"><p>Áreas registradas</p><strong>{{ $areas->count() }}</strong><small>Total de áreas en el sistema</small></div><div class="admin-stat"><p>Centros vinculados</p><strong>{{ $areas->pluck('trainingcenter_id')->unique()->count() }}</strong><small>Sedes con áreas asignadas</small></div><div class="admin-stat"><p>Programas asociados</p><strong>{{ $areas->sum('programs_count') }}</strong><small>Programas relacionados</small></div></section>
+<section class="admin-panel"><div class="mb-5"><p class="admin-eyebrow">Listado</p><h2 class="admin-heading">Todas las áreas</h2></div>@if($areas->isEmpty())<div class="admin-empty">Aún no hay áreas registradas. <a href="{{ route('areas.create') }}">Crear la primera</a></div>@else<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Área</th><th>Centro</th><th>Programas</th><th>Registrada</th><th>Acciones</th></tr></thead><tbody>@foreach($areas as $area)<tr><td><span class="admin-avatar">{{ strtoupper(substr($area->nombre, 0, 1)) }}</span><b>{{ $area->nombre }}</b></td><td>{{ $area->trainingcenter?->nombre ?? 'Sin centro' }}</td><td>{{ $area->programs_count }}</td><td>{{ $area->created_at?->translatedFormat('d M Y') }}</td><td><div class="admin-actions"><a href="{{ route('areas.show', $area) }}" title="Ver">Ver</a><a href="{{ route('areas.edit', $area) }}" title="Editar">Editar</a><form method="POST" action="{{ route('areas.destroy', $area) }}" onsubmit="return confirm('¿Eliminar esta área?');">@csrf @method('DELETE')<button title="Eliminar">Eliminar</button></form></div></td></tr>@endforeach</tbody></table></div>@endif</section>
+</div>
+@endsection

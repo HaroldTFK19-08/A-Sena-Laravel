@@ -1,0 +1,45 @@
+<?php
+
+namespace Database\Factories;
+
+use App\Dominios\Ofertas\Models\Offer;
+use App\Dominios\Programas\Models\Program;
+use App\Dominios\Usuarios\Models\Admin;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+/**
+ * @extends Factory<Offer>
+ */
+class OfferFactory extends Factory
+{
+    protected $model = Offer::class;
+
+    public function definition(): array
+    {
+        $lanzamiento = now()->subDays(fake()->numberBetween(10, 60));
+
+        return [
+            'admin_id' => Admin::factory(),
+            'program_id' => Program::factory(),
+            'fecha_lanzamiento' => $lanzamiento->toDateString(),
+            'capacidad' => fake()->numberBetween(15, 60),
+            'fecha_convocatoria' => $lanzamiento->copy()->addDays(5)->toDateString(),
+            'fecha_fin_convocatoria' => $lanzamiento->copy()->addDays(40)->toDateString(),
+            'fecha_primera_prueba' => $lanzamiento->copy()->addDays(60)->toDateString(),
+            'fecha_segunda_prueba' => $lanzamiento->copy()->addDays(90)->toDateString(),
+            'fecha_seleccionados' => $lanzamiento->copy()->addDays(120)->toDateString(),
+            'imagen' => null,
+            'publicada' => fake()->boolean(),
+        ];
+    }
+
+    public function publicada(): static
+    {
+        return $this->state(['publicada' => true]);
+    }
+
+    public function borrador(): static
+    {
+        return $this->state(['publicada' => false]);
+    }
+}
