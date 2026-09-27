@@ -27,11 +27,11 @@ AdminSena es una plataforma Laravel para organizar la formación técnica del SE
 | Tablas de dominio | 20 | Tablas propias de negocio; se excluyen las internas de Laravel |
 | Controladores de dominio | 24 | CRUD y flujos específicos por módulo |
 | Vistas Blade | 134 | Dashboards, CRUD, formularios, layouts, componentes e inclusions |
-| Rutas registradas | 146 | Web y API, incluyendo las rutas generadas por Laravel |
+| Rutas registradas | 222 | Web y API versionada, incluyendo las rutas generadas por Laravel |
 | Factories | 20 | Una por tabla/modelo de dominio, incluidas las dos pivotes |
 | Seeders | 22 | 20 seeders de dominio + `DatabaseSeeder` + compatibilidad `AdminUserSeeder` |
 | Migraciones | 24 | 21 relacionadas con dominio y 3 internas de Laravel/Sanctum |
-| Pruebas | 16 tests / 100 assertions | Suite ejecutada con SQLite en memoria |
+| Pruebas | 23 tests / 243 assertions | Suite ejecutada con SQLite en memoria |
 | Vite build | Correcto | Vite 6.4.3, Laravel Vite Plugin 1.3 y Tailwind 4 |
 
 ### Conclusión ejecutiva
@@ -124,6 +124,33 @@ El login regenera la sesión y redirige según el rol:
 - JavaScript de aplicación compilado mediante `npm run build`.
 
 El layout principal de portals es `Layouts/Usuarios/AppAdmin.blade.php`. Aunque su nombre histórico es `AppAdmin`, decide dinámicamente qué sidebar y header usar según el nombre de la ruta. `AppAprendiz.blade.php` existe como layout legado y no contiene el portal funcional; las vistas activas extenderán el layout dinámico.
+
+### 2.6 API REST
+
+La API está versionada bajo `/v1` y utiliza Laravel Sanctum. El login en `POST /v1/auth/login` devuelve un token Bearer; `GET /v1/auth/me` permite recuperar el usuario autenticado y `POST /v1/auth/logout` revoca el token.
+
+Los controladores API están organizados en `Controllers/Api` dentro de cada dominio y siguen una respuesta común con `success`, `message`, `data` y, en listados, `meta` de paginación.
+
+```text
+/v1/centros
+/v1/areas
+/v1/ambientes
+/v1/equipos
+/v1/programas
+/v1/fichas
+/v1/competencias
+/v1/resultados
+/v1/calificaciones
+/v1/asignaciones
+/v1/ofertas
+/v1/inscripciones
+/v1/noticias
+/v1/usuarios
+```
+
+Cada recurso expone `GET`, `POST`, `GET /{id}`, `PUT/PATCH /{id}` y `DELETE /{id}`. Los endpoints institucionales exigen rol `Admin`; asignaciones, calificaciones e inscripciones aplican el alcance del Instructor, Aprendiz o Aspirante.
+
+La referencia completa de la API está en [AdminSena-API.md](AdminSena-API.md).
 
 ---
 
@@ -642,8 +669,8 @@ php artisan test --compact
 Resultado validado:
 
 ```text
-16 tests
-100 assertions
+23 tests
+243 assertions
 ```
 
 La configuración de `phpunit.xml` usa SQLite en memoria. Esto permite validar migraciones, factories, seeders, relaciones y autorización sin depender de MySQL local.
@@ -703,7 +730,7 @@ Esta sección distingue funcionalidades implementadas de riesgos que todavía de
 3. Introducir Policies para autorización por objeto y no solo por rol.
 4. Añadir CI con SQLite aislado.
 5. Completar pruebas de resource bindings, archivos, onboarding y autorización.
-6. Definir contratos API: actualmente los archivos `Routes/api.php` de los dominios están vacíos y solo existe `/api/user` Sanctum.
+6. Versionar y documentar la API: la API CRUD está bajo `/v1`, pero conviene añadir versionado de cambios y contratos OpenAPI.
 
 ---
 
@@ -730,7 +757,7 @@ Esta sección distingue funcionalidades implementadas de riesgos que todavía de
 - Implementar logout/remember.
 - Añadir auditoría de cambios de estado y calificaciones.
 - Crear jobs para procesamiento de archivos y reportes.
-- Añadir API real solo después de definir contratos y autenticación.
+- Añadir una especificación OpenAPI y versionado de la API después de cerrar los contratos actuales.
 
 ### Fase 4 — entrega
 

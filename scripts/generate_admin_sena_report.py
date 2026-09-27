@@ -439,11 +439,11 @@ def build_story() -> list[Flowable]:
     story.extend(section("1. Resumen ejecutivo", "Una vista de alto nivel para presentar el alcance actual y la dirección técnica."))
     story.append(P("AdminSena es una plataforma Laravel para organizar la formación técnica del SENA. Integra un portal público, autenticación por rol, operación institucional, seguimiento docente, proceso del aprendiz y admisión de aspirantes. La organización por dominios permite que cada área de negocio tenga sus propios controladores, requests, modelos, rutas y vistas."))
     story.append(metric_strip([
-        ("146", "rutas"),
+        ("222", "rutas"),
         ("20", "tablas de dominio"),
         ("134", "vistas Blade"),
         ("14", "módulos"),
-        ("16 / 100", "tests / assertions"),
+        ("23 / 243", "tests / assertions"),
     ]))
     story.append(Spacer(1, 12))
     story.append(callout("Lectura ejecutiva", "La base funcional ya es considerable: Eloquent expresa las relaciones, los portales limitan consultas al usuario y la UI tiene un shell responsive común. La prioridad siguiente es cerrar autorización por objeto, publicación, privacidad de documentos y contratos inconsistentes.", "success"))
@@ -503,9 +503,17 @@ def build_story() -> list[Flowable]:
         "`RouteServiceProvider` carga los archivos web/API de cada dominio explícitamente; por eso el proyecto no depende de un único archivo de rutas gigante.",
         "Los grupos `web` incluyen cookies, sesión, CSRF y bindings. El grupo `api` agrega throttling de 60 solicitudes por minuto.",
         "Los alias `admin`, `instructor`, `aprendiz` y `aspirante` aplican autorización básica por rol; algunos controladores añaden autorización por objeto y ámbito.",
-        "Los archivos de API de los dominios están preparados como puntos de extensión, pero actualmente están vacíos; la API real es un trabajo futuro.",
+        "Los archivos de API de cada dominio están activos y usan `auth:sanctum`; las mutaciones institucionales aplican además el middleware `admin`.",
     ]))
-    story.append(callout("Decisión arquitectónica positiva", "La separación por dominios mejora la navegabilidad del código y hace visible qué parte del sistema debe cambiar para una nueva regla de negocio. La siguiente mejora es convertir parte de las reglas de autorización en Policies reutilizables.", "success"))
+    story.append(subsection("3.3 API REST por dominio"))
+    story.extend(bullets([
+        "La API está versionada bajo `/v1` y autentica con tokens Bearer de Laravel Sanctum.",
+        "`POST /v1/auth/login` devuelve el token; `GET /v1/auth/me` consulta el usuario; `POST /v1/auth/logout` revoca el token.",
+        "Los controladores `Controllers/Api` de cada dominio exponen listados paginados, búsqueda, detalle, creación, actualización y eliminación.",
+        "Los recursos están en `/v1/centros`, `/v1/areas`, `/v1/ambientes`, `/v1/equipos`, `/v1/programas`, `/v1/fichas`, `/v1/competencias`, `/v1/resultados`, `/v1/calificaciones`, `/v1/asignaciones`, `/v1/ofertas`, `/v1/inscripciones`, `/v1/noticias` y `/v1/usuarios`.",
+        "La respuesta usa `success`, `message`, `data` y `meta`; el detalle completo está en `docs/AdminSena-API.md`.",
+    ]))
+    story.append(callout("Decisión arquitectónica positiva", "La separación por dominios mejora la navegabilidad del código y hace visible qué parte del sistema debe cambiar para una nueva regla de negocio. La API reutiliza el mismo dominio Eloquent y conserva el alcance de rol en asignaciones, calificaciones e inscripciones.", "success"))
     story.append(PageBreak())
 
     # Domain overview
@@ -803,7 +811,7 @@ def build_story() -> list[Flowable]:
             ["DatabaseSeeder", "Correcto", "Carga la cadena de dependencias"],
             ["Idempotencia", "Correcto", "Segunda ejecución conserva conteos"],
             ["Migraciones SQLite", "Correcto", "Rama SQLite de restructuring y enum Cancelada verificadas"],
-            ["Suite PHPUnit", "16 / 100", "Ejecutada en SQLite en memoria"],
+            ["Suite PHPUnit", "23 / 243", "Ejecutada en SQLite en memoria"],
             ["Pint / Vite", "Correcto", "Formato y build verificados"],
         ],
         [2.1 * inch, 1.3 * inch, PAGE_WIDTH - LEFT - RIGHT - 3.4 * inch],
@@ -818,7 +826,7 @@ def build_story() -> list[Flowable]:
         ["P0", "Privacidad", "Documentos en disco public", "Disco privado + descarga autorizada"],
         ["P1", "Publicación", "Reglas editoriales entre request, modelo y vista", "Policy de publicación única"],
         ["P1", "Negocio", "Duplicados lógicos sin constraints DB", "Uniques parciales/transacciones"],
-        ["P1", "UX/API", "Métricas hardcodeadas y API vacía", "Métricas reales; contratos API"],
+        ["P2", "API", "Falta OpenAPI y versionado de contratos", "Documentar y versionar la API"],
     ]
     story.append(make_table(["Prioridad", "Área", "Riesgo", "Acción"], risks_rows, [0.65 * inch, 1.1 * inch, PAGE_WIDTH - LEFT - RIGHT - 5.1 * inch, 3.35 * inch], small=True, header_color=HexColor("#7A2E2E")))
     story.append(PageBreak())

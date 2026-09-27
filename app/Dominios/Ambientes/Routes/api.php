@@ -1,5 +1,10 @@
 <?php
 
+use App\Dominios\Ambientes\Controllers\Api\EnvironmentApiController;
 use Illuminate\Support\Facades\Route;
-use App\Dominios\Ambientes\Controllers\ConsultasController;
-Route::get('/consulta1', [ConsultasController::class, 'consulta1']);
+
+Route::middleware(['auth:sanctum', 'admin'])->group(function () {
+    Route::apiResource('ambientes', EnvironmentApiController::class)
+        ->parameters(['ambientes' => 'ambiente'])
+        ->names('api.ambientes');
+});

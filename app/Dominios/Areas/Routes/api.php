@@ -1,0 +1,10 @@
+<?php
+
+use App\Dominios\Areas\Controllers\Api\AreaApiController;
+use Illuminate\Support\Facades\Route;
+
+Route::middleware(['auth:sanctum', 'admin'])->group(function () {
+    Route::apiResource('areas', AreaApiController::class)
+        ->parameters(['areas' => 'area'])
+        ->names('api.areas');
+});

@@ -13,14 +13,12 @@ class ResultRequest extends FormRequest
 
     public function rules(): array
     {
-        $esEdicion = $this->route('resultado') !== null;
-
         return [
             'competition_id' => ['required', 'integer', 'exists:competitions,id'],
             'codigo' => ['nullable', 'string', 'max:255'],
             'nombre' => ['required', 'string', 'max:255'],
             'descripcion' => ['nullable', 'string'],
-            'cantidad' => [$esEdicion ? 'nullable' : 'required', 'integer', 'min:1', 'max:30'],
+            'cantidad' => ['sometimes', 'nullable', 'integer', 'min:1', 'max:30'],
         ];
     }
 }

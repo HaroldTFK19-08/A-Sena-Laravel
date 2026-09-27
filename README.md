@@ -59,10 +59,51 @@ Las credenciales de demostración usan la contraseña `12345678`:
 - `aprendiz1@adminsena.com`
 - `aspirante1@adminsena.com`
 
+### API REST
+
+La API está versionada bajo `/v1` y utiliza Sanctum. Inicia sesión para obtener un token:
+
+```bash
+curl -X POST http://localhost:8000/v1/auth/login \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@adminsena.com","password":"12345678","device_name":"local"}'
+```
+
+Después envía el token en las operaciones protegidas:
+
+```bash
+curl http://localhost:8000/v1/centros \
+  -H "Accept: application/json" \
+  -H "Authorization: Bearer TU_TOKEN"
+```
+
+Recursos CRUD disponibles:
+
+```text
+/v1/centros
+/v1/areas
+/v1/ambientes
+/v1/equipos
+/v1/programas
+/v1/fichas
+/v1/competencias
+/v1/resultados
+/v1/calificaciones
+/v1/asignaciones
+/v1/ofertas
+/v1/inscripciones
+/v1/noticias
+/v1/usuarios
+```
+
+Cada recurso expone `GET`, `POST`, `GET /{id}`, `PUT/PATCH /{id}` y `DELETE /{id}`. Las operacionesInstitucionales, usuarios, noticias, ofertas, fichas, competencias y resultados exigen rol `Admin`; asignaciones, calificaciones e inscripciones aplican además el ámbito del rol.
+
 ### Documentación técnica
 
 - [Informe PDF para presentación](docs/AdminSena-explicacion-tecnica.pdf)
 - [Explicación técnica en Markdown](docs/AdminSena-explicacion-tecnica.md)
+- [Documentación de la API REST](docs/AdminSena-API.md)
 
 ## About Laravel
 
