@@ -35,7 +35,15 @@ class OfferFactory extends Factory
 
     public function publicada(): static
     {
-        return $this->state(['publicada' => true]);
+        return $this->state([
+            'publicada' => true,
+            'fecha_lanzamiento' => now()->subDays(10)->toDateString(),
+            'fecha_convocatoria' => now()->subDays(5)->toDateString(),
+            'fecha_fin_convocatoria' => now()->addDays(30)->toDateString(),
+            'fecha_primera_prueba' => now()->addDays(50)->toDateString(),
+            'fecha_segunda_prueba' => now()->addDays(80)->toDateString(),
+            'fecha_seleccionados' => now()->addDays(110)->toDateString(),
+        ]);
     }
 
     public function borrador(): static

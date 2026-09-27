@@ -17,7 +17,7 @@ class RegistrationApiController extends ApiController
         $user = $this->requireRole(['Admin', 'Aspirante']);
         $query = Registration::query()->with(['offer.program', 'aspirant.user']);
 
-        if ($user->rol === 'Aspirante') {
+        if ($user?->rol === 'Aspirante') {
             $query->whereHas('aspirant', function ($aspirantes) use ($user) {
                 $aspirantes->where('user_id', $user->id);
             });
@@ -35,7 +35,7 @@ class RegistrationApiController extends ApiController
         $user = $this->requireRole(['Admin', 'Aspirante']);
         $data = $request->validated();
 
-        if ($user->rol === 'Aspirante') {
+        if ($user?->rol === 'Aspirante') {
             $aspirant = $user->aspirant;
             abort_unless($aspirant, 403, 'Debes tener un perfil de aspirante para inscribirte.');
             $this->assertOfferOpen(Offer::findOrFail($data['offer_id']));
@@ -71,7 +71,7 @@ class RegistrationApiController extends ApiController
         $this->authorizeRegistration($inscripcion);
         $data = $request->validated();
 
-        if ($user->rol === 'Aspirante') {
+        if ($user?->rol === 'Aspirante') {
             abort_unless($inscripcion->permiteEdicion(), 403, 'La inscripción ya no permite modificaciones.');
             $this->assertOfferOpen(Offer::findOrFail($data['offer_id']));
             $this->assertUnique($inscripcion->aspirant_id, $data['offer_id'], $inscripcion->id);
@@ -89,20 +89,21 @@ class RegistrationApiController extends ApiController
         $user = $this->requireRole(['Admin', 'Aspirante']);
         $this->authorizeRegistration($inscripcion);
 
-        if ($user->rol === 'Aspirante') {
+        if ($user?->rol === 'Aspirante') {
             abort_unless($inscripcion->permiteCancelacion(), 403, 'La inscripción no puede cancelarse.');
             $inscripcion->update(['estado' => 'Cancelada']);
         } else {
             $inscripcion->delete();
         }
 
-        return $this->success(null, $user->rol === 'Aspirante' ? 'Inscripción cancelada correctamente.' : 'Inscripción eliminada correctamente.');
+        return $this->success(null, $user?->rol === 'Aspirante' ? 'Inscripción cancelada correctamente.' : 'Inscripción eliminada correctamente.');
     }
 
     private function authorizeRegistration(Registration $inscripcion): void
     {
         $user = $this->requireRole(['Admin', 'Aspirante']);
-        if ($user->rol === 'Admin') {
+
+        if (! $user || $user->rol === 'Admin') {
             return;
         }
 

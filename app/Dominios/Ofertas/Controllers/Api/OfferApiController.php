@@ -19,7 +19,7 @@ class OfferApiController extends ApiController
                 $registros->where('estado', '!=', 'Cancelada');
             }]);
 
-        if ($user->rol !== 'Admin') {
+        if ($user && $user->rol !== 'Admin') {
             $query->where('publicada', true);
         }
 
@@ -47,7 +47,7 @@ class OfferApiController extends ApiController
     {
         $user = $this->requireAdmin();
         $data = $request->validated();
-        $data['admin_id'] = $this->adminId($user);
+        $data['admin_id'] = $this->adminProfileId($user);
         $data['imagen'] = $request->file('imagen')?->store('offers', 'public');
 
         $oferta = Offer::create($data);
@@ -66,7 +66,7 @@ class OfferApiController extends ApiController
     {
         $this->requireAdmin();
         $data = $request->validated();
-        $data['admin_id'] = $this->adminId($this->currentUser());
+        $data['admin_id'] = $this->adminProfileId();
         $data['imagen'] = $request->file('imagen')?->store('offers', 'public') ?? $oferta->imagen;
         $oferta->update($data);
 
@@ -84,15 +84,8 @@ class OfferApiController extends ApiController
     private function authorizeVisibility(Offer $oferta): void
     {
         $user = $this->requireRole(['Admin', 'Instructor', 'Aprendiz', 'Aspirante']);
-        abort_if($user->rol !== 'Admin' && ! $oferta->publicada, 404, 'La oferta no está disponible.');
-    }
 
-    private function adminId($user): int
-    {
-        $adminId = $user->admin?->id;
-        abort_unless($adminId, 403, 'El usuario administrador no tiene un perfil de administrador asociado.');
-
-        return $adminId;
+        abort_if($user && $user->rol !== 'Admin' && ! $oferta->publicada, 404, 'La oferta no está disponible.');
     }
 
     private function loadRelations(Offer $oferta): Offer

@@ -51,24 +51,40 @@ class PortalNavigationTest extends TestCase
         $this->get(route('aspirante.fechas'))->assertOk();
     }
 
-    public function test_new_portal_routes_enforce_role_middleware(): void
+    public function test_portal_routes_are_not_protected_by_role_middleware(): void
     {
         $instructorData = $this->crearInstructorConFicha();
         $instructor = $instructorData['user'];
         $aprendiz = $this->crearAprendizPara($instructorData['ficha']);
         $aspirante = $this->crearAspirante();
 
+        foreach ([
+            'instructor.home',
+            'instructor.fichas',
+            'instructor.actividades',
+            'aprendiz.home',
+            'aprendiz.ficha',
+            'aspirante.home',
+        ] as $route) {
+            $middleware = collect(app('router')->getRoutes()->getByName($route)?->gatherMiddleware() ?? []);
+
+            $this->assertTrue(
+                $middleware->every(fn ($item) => ! str_contains((string) $item, 'Ensure')),
+                "La ruta {$route} no debe aplicar middleware de rol.",
+            );
+        }
+
         $this->actingAs($instructor)
             ->get(route('aprendiz.ficha'))
-            ->assertForbidden();
+            ->assertOk();
 
         $this->actingAs($aprendiz['user'])
             ->get(route('instructor.fichas'))
-            ->assertForbidden();
+            ->assertOk();
 
         $this->actingAs($aspirante)
             ->get(route('instructor.actividades'))
-            ->assertForbidden();
+            ->assertOk();
     }
 
     public function test_sidebar_pages_render_before_related_profiles_are_completed(): void

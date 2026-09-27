@@ -3,12 +3,12 @@
 use App\Dominios\Asignaciones\Controllers\AssignmentController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('asignaciones', [AssignmentController::class, 'index'])->name('asignaciones.index');
     Route::get('asignaciones/{assignment}', [AssignmentController::class, 'show'])->name('asignaciones.show');
 });
 
-Route::middleware(['auth', 'instructor'])->prefix('instructor')->name('instructor.')->group(function () {
+Route::prefix('instructor')->name('instructor.')->group(function () {
     Route::get('asignaciones', [AssignmentController::class, 'index'])->name('asignaciones.index');
     Route::get('asignaciones/create', [AssignmentController::class, 'create'])->name('asignaciones.create');
     Route::post('asignaciones', [AssignmentController::class, 'store'])->name('asignaciones.store');

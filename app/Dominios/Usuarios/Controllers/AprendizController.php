@@ -5,7 +5,7 @@ namespace App\Dominios\Usuarios\Controllers;
 use App\Dominios\Competencias\Models\Competition;
 use App\Dominios\Fichas\Models\Course_group;
 use App\Dominios\Usuarios\Models\User;
-use App\Dominios\Usuarios\Request\PerfilAprendizRequest;
+use App\Dominios\Usuarios\Requests\PerfilAprendizRequest;
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
 

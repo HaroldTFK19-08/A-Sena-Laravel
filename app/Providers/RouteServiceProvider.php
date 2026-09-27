@@ -10,7 +10,20 @@ use Illuminate\Support\Facades\Route;
 
 class RouteServiceProvider extends ServiceProvider
 {
-    public const HOME = '/home';
+    public const HOME = '/';
+
+    /**
+     * Ruta de inicio de cada portal según el rol del usuario.
+     *
+     * Se comparte entre el login (LoginController) y el middleware `guest`
+     * (RedirectIfAuthenticated) para que ambos redirijan al mismo sitio.
+     */
+    public const ROLE_HOME = [
+        'Admin' => 'admin.home',
+        'Instructor' => 'instructor.home',
+        'Aprendiz' => 'aprendiz.home',
+        'Aspirante' => 'aspirante.home',
+    ];
 
     public function boot(): void
     {
@@ -26,17 +39,17 @@ class RouteServiceProvider extends ServiceProvider
             // Rutas generales Web
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));
-            //=====================
-            //AUTH
-            //=====================
+            // =====================
+            // AUTH
+            // =====================
             Route::middleware('web')
                 ->group(base_path('app/Dominios/Auth/Routes/web.php'));
             Route::middleware('api')
                 ->prefix('v1')
                 ->group(base_path('app/Dominios/Auth/Routes/api.php'));
-            //=====================
-            //USUARIOS
-            //=====================
+            // =====================
+            // USUARIOS
+            // =====================
             Route::middleware('web')
                 ->group(base_path('app/Dominios/Usuarios/Routes/web.php'));
             Route::middleware('api')
@@ -50,9 +63,9 @@ class RouteServiceProvider extends ServiceProvider
             Route::middleware('api')
                 ->prefix('v1')
                 ->group(base_path('app/Dominios/Centros/Routes/api.php'));
-            //==========================
+            // ==========================
             // AMBIENTES
-            //==========================
+            // ==========================
             Route::middleware('web')
                 ->group(base_path('app/Dominios/Ambientes/Routes/web.php'));
             Route::middleware('api')

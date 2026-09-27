@@ -48,6 +48,63 @@ class ApiCrudTest extends TestCase
         $this->token = $login->json('data.token');
     }
 
+    public function test_domain_routes_do_not_use_authentication_middleware(): void
+    {
+        $apiRoute = app('router')->getRoutes()->getByName('api.centros.index');
+        $webRoute = app('router')->getRoutes()->getByName('instructor.home');
+
+        $this->assertSame(['api'], $apiRoute?->gatherMiddleware());
+        $this->assertSame(['web'], $webRoute?->gatherMiddleware());
+    }
+
+    public function test_every_api_index_answers_without_a_token(): void
+    {
+        $routes = [
+            'api.centros.index',
+            'api.areas.index',
+            'api.ambientes.index',
+            'api.equipos.index',
+            'api.programas.index',
+            'api.fichas.index',
+            'api.competencias.index',
+            'api.resultados.index',
+            'api.calificaciones.index',
+            'api.asignaciones.index',
+            'api.ofertas.index',
+            'api.inscripciones.index',
+            'api.noticias.index',
+            'api.usuarios.index',
+        ];
+
+        foreach ($routes as $route) {
+            $this->getJson(route($route))
+                ->assertOk()
+                ->assertJsonStructure(['success', 'message', 'data', 'meta']);
+        }
+
+        $this->getJson(route('api.auth.me'))
+            ->assertOk()
+            ->assertJsonPath('data', null);
+    }
+
+    public function test_api_writes_succeed_without_a_token_in_practice_mode(): void
+    {
+        $centro = $this->postResource('api.centros.store', [
+            'nombre' => 'Centro sin token',
+            'direccion' => 'Carrera 12 # 34-56',
+        ], withToken: false);
+
+        $this->assertDatabaseHas('trainingcenters', ['id' => $centro]);
+
+        $this->postJson(route('api.noticias.store'), [
+            'trainingcenter_id' => $centro,
+            'titulo' => 'Noticia sin token',
+            'descripcion' => 'Se crea sin autenticación en modo práctica.',
+            'estado' => 'Publicado',
+            'categoria' => 'Tecnologia',
+        ])->assertCreated();
+    }
+
     public function test_admin_can_authenticate_and_access_domain_indexes(): void
     {
         $routes = [
@@ -234,14 +291,17 @@ class ApiCrudTest extends TestCase
 
         $this->withToken($this->token)
             ->getJson(route('api.auth.me'))
-            ->assertUnauthorized();
+            ->assertOk()
+            ->assertJsonPath('data', null);
     }
 
-    private function postResource(string $route, array $payload): int
+    private function postResource(string $route, array $payload, bool $withToken = true): int
     {
-        $response = $this->withToken($this->token)
-            ->postJson(route($route), $payload)
-            ->assertCreated();
+        $response = $withToken
+            ? $this->withToken($this->token)->postJson(route($route), $payload)
+            : $this->postJson(route($route), $payload);
+
+        $response->assertCreated();
 
         return (int) $response->json('data.id');
     }

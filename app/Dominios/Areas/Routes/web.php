@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Dominios\Areas\Controllers\AreaController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('areas/index', [AreaController::class, 'index'])->name('areas.index');
 Route::get('areas/create', [AreaController::class, 'create'])->name('areas.create');

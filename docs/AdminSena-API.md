@@ -1,8 +1,18 @@
 # AdminSena API REST
 
-La API está versionada bajo `/v1` y usa Laravel Sanctum para autenticar clientes.
+La API está versionada bajo `/v1`.
 
-## Autenticación
+> [!IMPORTANT]
+> **Las rutas API y web están abiertas** (proyecto de práctica). No se aplica
+> middleware de autenticación (`auth`, `auth:sanctum`) ni de rol (`admin`,
+> `instructor`, `aprendiz`, `aspirante`) en las definiciones de ruta, y los
+> controladores tampoco bloquean cuando no llega un token.
+>
+> El token Bearer es **opcional**: si lo envías, el alcance del rol se aplica
+> dentro de los controladores. Si no lo envías, todos los endpoints responden
+> con normalidad.
+
+## Autenticación (opcional)
 
 ### Iniciar sesión
 
@@ -119,12 +129,20 @@ Recursos disponibles:
 
 ## Roles y permisos
 
+Los roles se aplican **dentro de los controladores**, no como middleware de ruta.
+Todos los endpoints responden **sin token**:
+
 - `Admin`: CRUD completo de centros, áreas, ambientes, equipos, programas, fichas, competencias, resultados, ofertas, noticias y usuarios.
 - `Instructor`: consulta y opera asignaciones y calificaciones dentro de sus fichas y competencias.
 - `Aprendiz`: consulta únicamente sus asignaciones y calificaciones.
 - `Aspirante`: consulta ofertas publicadas, gestiona sus inscripciones y solo puede cancelar las que están en estado editable.
-- Las operaciones sin token devuelven `401`.
-- Las operaciones fuera del ámbito del usuario devuelven `403`.
+
+Cuando **sí** envías un token, el alcance del rol se aplica: un `Instructor` solo
+ve las asignaciones de sus fichas, un `Aprendiz` solo las suyas, un `Aspirante`
+solo sus inscripciones, y así sucesivamente. Enviar el token incorrecto o de
+otro rol devuelve `403` en las operaciones de escritura.
+
+Para reactivar la protección por rol, pon `API_PRACTICE_MODE=false` en `.env`.
 
 ## Ejemplos
 

@@ -3,14 +3,23 @@
 namespace App\Dominios\Resultados\Requests;
 
 use App\Dominios\Resultados\Models\Grade;
+use App\Support\Concerns\ResolvesApiUser;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class GradeApiRequest extends FormRequest
 {
+    use ResolvesApiUser;
+
     public function authorize(): bool
     {
-        return in_array($this->user()?->rol, ['Admin', 'Instructor'], true);
+        $user = $this->resolveApiUser($this);
+
+        if (! $user && $this->apiPracticeMode()) {
+            return true;
+        }
+
+        return in_array($user?->rol, ['Admin', 'Instructor'], true);
     }
 
     public function rules(): array

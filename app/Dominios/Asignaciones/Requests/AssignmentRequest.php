@@ -2,13 +2,20 @@
 
 namespace App\Dominios\Asignaciones\Requests;
 
+use App\Support\Concerns\ResolvesApiUser;
 use Illuminate\Foundation\Http\FormRequest;
 
 class AssignmentRequest extends FormRequest
 {
+    use ResolvesApiUser;
+
     public function authorize(): bool
     {
-        return auth()->check();
+        if ($this->apiPracticeMode() && ! auth()->check() && ! $this->resolveApiUser($this)) {
+            return true;
+        }
+
+        return auth()->check() || $this->resolveApiUser($this) !== null;
     }
 
     public function rules(): array

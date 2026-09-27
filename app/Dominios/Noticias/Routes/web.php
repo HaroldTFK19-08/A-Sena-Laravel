@@ -1,8 +1,6 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Dominios\Noticias\Controllers\NewsController;
+use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'admin'])->group(function () {
-	Route::resource('noticias', NewsController::class);
-});
+Route::resource('noticias', NewsController::class);

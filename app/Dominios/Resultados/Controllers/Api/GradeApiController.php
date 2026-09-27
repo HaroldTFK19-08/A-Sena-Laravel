@@ -17,7 +17,7 @@ class GradeApiController extends ApiController
         $user = $this->requireRole(['Admin', 'Instructor', 'Aprendiz']);
         $query = Grade::query()->with(['result.competition', 'apprentice.user', 'teacher.user']);
 
-        if ($user->rol === 'Instructor') {
+        if ($user?->rol === 'Instructor') {
             $teacher = $user->teacher;
             $query->whereHas('apprentice.coursegroup', function ($fichas) use ($teacher) {
                 if ($teacher) {
@@ -26,7 +26,7 @@ class GradeApiController extends ApiController
                     $fichas->whereRaw('1 = 0');
                 }
             });
-        } elseif ($user->rol === 'Aprendiz') {
+        } elseif ($user?->rol === 'Aprendiz') {
             $query->whereHas('apprentice', function ($aprendices) use ($user) {
                 $aprendices->where('user_id', $user->id);
             });
@@ -95,9 +95,8 @@ class GradeApiController extends ApiController
     private function authorizeAcademicData(array $data): void
     {
         $user = $this->currentUser();
-        abort_if(! $user, 403);
 
-        if ($user->rol === 'Admin') {
+        if (! $user || $user->rol === 'Admin') {
             return;
         }
 
@@ -117,9 +116,8 @@ class GradeApiController extends ApiController
     private function authorizeGrade(Grade $calificacion): void
     {
         $user = $this->currentUser();
-        abort_if(! $user, 403);
 
-        if ($user->rol === 'Admin') {
+        if (! $user || $user->rol === 'Admin') {
             return;
         }
 

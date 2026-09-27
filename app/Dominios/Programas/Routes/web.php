@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Dominios\Programas\Controllers\ProgramController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('programas/index', [ProgramController::class, 'index'])->name('programas.index');
 Route::get('programas/create', [ProgramController::class, 'create'])->name('programas.create');

@@ -3,19 +3,29 @@
 namespace App\Dominios\Inscripciones\Requests;
 
 use App\Dominios\Inscripciones\Models\Registration;
+use App\Support\Concerns\ResolvesApiUser;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class RegistrationApiRequest extends FormRequest
 {
+    use ResolvesApiUser;
+
     public function authorize(): bool
     {
-        return in_array($this->user()?->rol, ['Admin', 'Aspirante'], true);
+        $user = $this->resolveApiUser($this);
+
+        if (! $user && $this->apiPracticeMode()) {
+            return true;
+        }
+
+        return in_array($user?->rol, ['Admin', 'Aspirante'], true);
     }
 
     public function rules(): array
     {
-        $admin = $this->user()?->rol === 'Admin';
+        $user = $this->resolveApiUser($this);
+        $admin = ! $user || $user->rol === 'Admin';
 
         return [
             'aspirant_id' => [$admin ? 'required' : 'nullable', 'integer', 'exists:aspirants,id'],

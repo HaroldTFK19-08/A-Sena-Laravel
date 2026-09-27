@@ -3,7 +3,7 @@
 namespace App\Dominios\Usuarios\Controllers;
 
 use App\Dominios\Usuarios\Models\User;
-use App\Dominios\Usuarios\Request\PerfilAspiranteRequest;
+use App\Dominios\Usuarios\Requests\PerfilAspiranteRequest;
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
 

@@ -153,13 +153,30 @@
 
             </div>
 
-            {{-- BOTÓN --}}
-            <a
-                href="{{ $editRoute }}"
-                class="inline-flex shrink-0 items-center justify-center rounded-xl px-6 py-3 text-sm font-extrabold shadow-lg transition duration-200 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 {{ $estilos['boton'] }}"
-            >
-                {{ $editLabel }}
-            </a>
+            {{-- ACCIONES: editar perfil y cerrar sesión --}}
+            <div class="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center">
+
+                <a
+                    href="{{ $editRoute }}"
+                    class="inline-flex shrink-0 items-center justify-center rounded-xl px-6 py-3 text-sm font-extrabold shadow-lg transition duration-200 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 {{ $estilos['boton'] }}"
+                >
+                    {{ $editLabel }}
+                </a>
+
+                <form method="POST" action="{{ route('auth.logout') }}">
+                    @csrf
+                    <button
+                        type="submit"
+                        class="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-[#D8E6EB] bg-white px-5 py-3 text-sm font-extrabold text-[#5F7785] shadow-lg transition duration-200 hover:-translate-y-0.5 hover:border-[#C46D63] hover:text-[#C46D63] focus:outline-none focus:ring-2 focus:ring-[#C46D63]/40 focus:ring-offset-2 sm:w-auto"
+                    >
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6A2.25 2.25 0 005.25 5.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+                        </svg>
+                        Cerrar sesión
+                    </button>
+                </form>
+
+            </div>
 
         </div>
 

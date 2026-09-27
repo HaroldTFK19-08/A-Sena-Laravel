@@ -58,8 +58,12 @@ class AuthApiController extends ApiController
 
     public function me(Request $request): JsonResponse
     {
-        /** @var User $user */
-        $user = $request->user();
+        $user = $this->currentUser();
+
+        if (! $user) {
+            return $this->success(null, 'No hay un usuario autenticado en la solicitud.');
+        }
+
         $user->load(['admin', 'teacher', 'apprentice', 'aspirant']);
 
         return $this->success($user, 'Usuario autenticado.');

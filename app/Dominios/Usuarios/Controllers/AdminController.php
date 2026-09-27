@@ -4,10 +4,8 @@ namespace App\Dominios\Usuarios\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Dominios\Centros\Models\Trainingcenter;
-use App\Dominios\Usuarios\Models\Apprentice;
 use App\Dominios\Usuarios\Models\User;
-use App\Dominios\Usuarios\Request\PerfilAdminRequest;
-
+use App\Dominios\Usuarios\Requests\PerfilAdminRequest as RequestPerfilAdminRequest;
 class AdminController extends Controller
 {
     //
@@ -37,7 +35,7 @@ class AdminController extends Controller
         $usuario->load('admin');
         return view('Usuarios.Admin.edit', compact('usuario'));
     }
-    public function update(PerfilAdminRequest $request){
+    public function update(RequestPerfilAdminRequest $request){
         /** @var User $usuario */
         $usuario = auth()->user();
         $datos = $request->validated();

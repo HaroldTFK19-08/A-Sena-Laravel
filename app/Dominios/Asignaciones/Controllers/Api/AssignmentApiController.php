@@ -77,6 +77,10 @@ class AssignmentApiController extends ApiController
 
     private function scopeQuery($query, $user): void
     {
+        if (! $user) {
+            return;
+        }
+
         if ($user->rol === 'Aprendiz') {
             $query->whereHas('apprentice', function ($aprendices) use ($user) {
                 $aprendices->where('user_id', $user->id);
@@ -99,7 +103,7 @@ class AssignmentApiController extends ApiController
 
     private function authorizeApprentice($user, Apprentice $apprentice): void
     {
-        if ($user->rol === 'Admin') {
+        if (! $user || $user->rol === 'Admin') {
             return;
         }
 
@@ -115,6 +119,10 @@ class AssignmentApiController extends ApiController
     {
         $user = $this->requireRole(['Admin', 'Instructor', 'Aprendiz']);
         $asignacion->loadMissing('apprentice.coursegroup');
+
+        if (! $user) {
+            return;
+        }
 
         if ($user->rol === 'Aprendiz') {
             abort_unless($asignacion->apprentice?->user_id === $user->id, 403, 'No tienes acceso a esta asignación.');

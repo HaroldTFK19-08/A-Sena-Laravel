@@ -2,14 +2,22 @@
 
 namespace App\Dominios\Fichas\Requests;
 
+use App\Dominios\Usuarios\Models\Teacher;
+use App\Support\Concerns\ResolvesApiUser;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class CourseGroupRequest extends FormRequest
 {
+    use ResolvesApiUser;
+
     public function authorize(): bool
     {
-        return auth()->check();
+        if ($this->apiPracticeMode() && ! auth()->check() && ! $this->resolveApiUser($this)) {
+            return true;
+        }
+
+        return auth()->check() || $this->resolveApiUser($this) !== null;
     }
 
     public function rules(): array
@@ -20,8 +28,8 @@ class CourseGroupRequest extends FormRequest
                 'required',
                 'integer',
                 function ($attribute, $value, $fail) {
-                    $teacher = \App\Dominios\Usuarios\Models\Teacher::find($value);
-                    if (!$teacher || strtolower($teacher->tipo_instructor) !== 'planta') {
+                    $teacher = Teacher::find($value);
+                    if (! $teacher || strtolower($teacher->tipo_instructor) !== 'planta') {
                         $fail('El instructor seleccionado debe ser de tipo Planta para ser asignado a una ficha.');
                     }
                 },

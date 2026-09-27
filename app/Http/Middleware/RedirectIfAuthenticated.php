@@ -13,7 +13,7 @@ class RedirectIfAuthenticated
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next, string ...$guards): Response
     {
@@ -21,10 +21,18 @@ class RedirectIfAuthenticated
 
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
-                return redirect(RouteServiceProvider::HOME);
+                return redirect()->route($this->homeRouteFor(Auth::user()));
             }
         }
 
         return $next($request);
+    }
+
+    /**
+     * Portal de inicio correspondiente al rol del usuario autenticado.
+     */
+    private function homeRouteFor($user): string
+    {
+        return RouteServiceProvider::ROLE_HOME[$user->rol ?? ''] ?? 'auth.inicio';
     }
 }

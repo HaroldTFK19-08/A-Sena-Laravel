@@ -22,7 +22,7 @@ class AssignmentAccessTest extends TestCase
             ->assertOk();
     }
 
-    public function test_admin_can_only_view_assignment_pages(): void
+    public function test_assignment_routes_are_open_to_any_authenticated_role(): void
     {
         $admin = User::factory()->create([
             'rol' => 'Admin',
@@ -33,8 +33,10 @@ class AssignmentAccessTest extends TestCase
             ->get(route('admin.asignaciones.index'))
             ->assertOk();
 
+        // Las rutas ya no aplican middleware de rol, así que el portal de
+        // instructor responde igual para un usuario Admin.
         $this->actingAs($admin)
             ->get(route('instructor.asignaciones.index'))
-            ->assertStatus(403);
+            ->assertOk();
     }
 }

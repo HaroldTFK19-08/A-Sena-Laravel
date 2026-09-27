@@ -34,7 +34,7 @@ class NewsApiController extends ApiController
     {
         $user = $this->requireAdmin();
         $data = $request->validated();
-        $data['admin_id'] = $this->adminId($user);
+        $data['admin_id'] = $this->adminProfileId($user);
         $data['imagen'] = $request->file('imagen')?->store('news', 'public');
 
         $noticia = News::create($data);
@@ -53,7 +53,7 @@ class NewsApiController extends ApiController
     {
         $user = $this->requireAdmin();
         $data = $request->validated();
-        $data['admin_id'] = $this->adminId($user);
+        $data['admin_id'] = $this->adminProfileId($user);
         $data['imagen'] = $request->file('imagen')?->store('news', 'public') ?? $noticia->imagen;
         $noticia->update($data);
 
@@ -66,14 +66,6 @@ class NewsApiController extends ApiController
         $noticia->delete();
 
         return $this->success(null, 'Noticia eliminada correctamente.');
-    }
-
-    private function adminId($user): int
-    {
-        $adminId = $user->admin?->id;
-        abort_unless($adminId, 403, 'El usuario administrador no tiene un perfil de administrador asociado.');
-
-        return $adminId;
     }
 
     private function loadRelations(News $noticia): News

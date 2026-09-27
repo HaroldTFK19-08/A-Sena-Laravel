@@ -2,13 +2,22 @@
 
 namespace App\Dominios\Resultados\Requests;
 
+use App\Support\Concerns\ResolvesApiUser;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ResultRequest extends FormRequest
 {
+    use ResolvesApiUser;
+
     public function authorize(): bool
     {
-        return auth()->user()?->rol === 'Admin';
+        $user = $this->resolveApiUser($this);
+
+        if (! $user && $this->apiPracticeMode()) {
+            return true;
+        }
+
+        return auth()->user()?->rol === 'Admin' || $user?->rol === 'Admin';
     }
 
     public function rules(): array

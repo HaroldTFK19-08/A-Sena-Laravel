@@ -10,7 +10,7 @@ use App\Dominios\Resultados\Models\Grade;
 use App\Dominios\Usuarios\Models\Apprentice;
 use App\Dominios\Usuarios\Models\Teacher;
 use App\Dominios\Usuarios\Models\User;
-use App\Dominios\Usuarios\Request\PerfilInstructorRequest;
+use App\Dominios\Usuarios\Requests\PerfilInstructorRequest;
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -211,9 +211,7 @@ class InstructorController extends Controller
                 });
             })
             ->latest('fecha_asignacion')
-            ->paginate(12)
-            ->withQueryString();
-
+            ->paginate(12);
         $base = $this->asignacionesVisiblesQuery($instructor);
         $resumen = [
             'total' => (clone $base)->count(),

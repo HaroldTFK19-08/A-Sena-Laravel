@@ -6,14 +6,23 @@ use App\Dominios\Auth\Controllers\RegisterController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [OfertasyNoticiasController::class, 'previa'])->name('auth.inicio');
-Route::get('/login', function () {
-    return view('Auth.login');
-})->name('auth.login');
-Route::post('/login', [LoginController::class, 'login'])->name('auth.login.submit');
-Route::get('/register', function () {
-    return view('Auth.register');
-})->name('auth.register');
-Route::post('/register', [RegisterController::class, 'register'])->name('auth.register.submit');
+
+// El acceso a la sesión se abre únicamente para usuarios NO autenticados.
+Route::middleware('guest')->group(function () {
+    Route::get('/login', function () {
+        return view('Auth.login');
+    })->name('auth.login');
+    Route::post('/login', [LoginController::class, 'login'])->name('auth.login.submit');
+    Route::get('/register', function () {
+        return view('Auth.register');
+    })->name('auth.register');
+    Route::post('/register', [RegisterController::class, 'register'])->name('auth.register.submit');
+});
+
+Route::post('/logout', [LoginController::class, 'logout'])
+    ->middleware('auth')
+    ->name('auth.logout');
+
 Route::get('/noticias-publicas', [OfertasyNoticiasController::class, 'noticias'])
     ->name('auth.noticias');
 Route::get('/noticias-publicas/buscar', [OfertasyNoticiasController::class, 'buscarNoticias'])
