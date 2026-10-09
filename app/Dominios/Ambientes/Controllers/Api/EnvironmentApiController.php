@@ -5,54 +5,40 @@ namespace App\Dominios\Ambientes\Controllers\Api;
 use App\Dominios\Ambientes\Models\Environment;
 use App\Dominios\Ambientes\Requests\EnvironmentRequest;
 use App\Http\Controllers\Api\ApiController;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class EnvironmentApiController extends ApiController
 {
-    public function index(Request $request): JsonResponse
+    public function index(Request $request)
     {
-        $query = Environment::query()
-            ->with('trainingcenter')
-            ->withCount('equipments')
-            ->when($request->filled('buscar'), function ($query) use ($request) {
-                $buscar = trim((string) $request->input('buscar'));
-                $query->where(function ($ambientes) use ($buscar) {
-                    $ambientes->where('nombre', 'like', "%{$buscar}%")
-                        ->orWhereHas('trainingcenter', function ($centros) use ($buscar) {
-                            $centros->where('nombre', 'like', "%{$buscar}%");
-                        });
-                });
-            })
-            ->when($request->filled('tipo_ambiente'), fn ($query) => $query->where('tipo_ambiente', $request->input('tipo_ambiente')))
-            ->orderByDesc('id');
-
-        return $this->paginated($this->applyPagination($query, $request), 'Ambientes obtenidos correctamente.');
+        $ambientes = Environment::latest()->get();
+        return response()->json($ambientes);
     }
 
-    public function store(EnvironmentRequest $request): JsonResponse
+    public function store(EnvironmentRequest $request)
     {
         $ambiente = Environment::create($request->validated());
-
-        return $this->created($ambiente->load('trainingcenter'), 'Ambiente creado correctamente.');
+        return response()->json($ambiente);
     }
-
-    public function show(Environment $ambiente): JsonResponse
+    public function show(int $id)
     {
-        return $this->success($ambiente->load(['trainingcenter', 'equipments']), 'Ambiente obtenido correctamente.');
+        $ambiente = Environment::with([
+            'trainingcenter',
+            'equipments' => function ($query) {
+                $query->select('id', 'name', 'brand', 'equipment_type', 'environment_id');
+            }
+        ])->findOrFail($id);
+        return response()->json($ambiente);
     }
-
-    public function update(EnvironmentRequest $request, Environment $ambiente): JsonResponse
+    public function update(EnvironmentRequest $request, Environment $ambiente)
     {
         $ambiente->update($request->validated());
-
-        return $this->success($ambiente->fresh(['trainingcenter', 'equipments']), 'Ambiente actualizado correctamente.');
+        return response()->json($ambiente);
     }
 
-    public function destroy(Environment $ambiente): JsonResponse
+    public function destroy(Environment $ambiente)
     {
         $ambiente->delete();
-
-        return $this->success(null, 'Ambiente eliminado correctamente.');
+        return response()->json($ambiente);
     }
 }

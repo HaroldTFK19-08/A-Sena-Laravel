@@ -8,6 +8,8 @@ use App\Http\Controllers\Api\ApiController;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+use function Laravel\Prompts\select;
+
 class TrainingCenterApiController extends ApiController
 {
     public function index(Request $request): JsonResponse
@@ -29,9 +31,17 @@ class TrainingCenterApiController extends ApiController
         $centro = Trainingcenter::create($request->validated());
         return $this->created($centro->loadCount(['areas', 'environments']), 'Centro creado correctamente.');
     }
-    public function show(Trainingcenter $centro): JsonResponse
+    public function show(int $id)
     {
-        return $this->success($centro->load(['areas', 'environments']), 'Centro obtenido correctamente.');
+        $centro = Trainingcenter::with([
+            'areas' => function ($query) {
+                $query->select('id', 'nombre', 'trainingcenter_id');
+            },
+            'environments' => function ($query) {
+                $query->select('id', 'nombre', 'trainingcenter_id');
+            }
+        ])->findOrFail($id);
+        return response()->json($centro);
     }
     public function update(TrainingcentersRequest $request, Trainingcenter $centro): JsonResponse
     {
