@@ -10,23 +10,14 @@ use Illuminate\Http\Request;
 
 class AreaApiController extends ApiController
 {
-    public function index(Request $request): JsonResponse
+    public function index()
     {
-        $query = Area::query()
-            ->with('trainingcenter')
-            ->withCount('programs')
-            ->when($request->filled('buscar'), function ($query) use ($request) {
-                $buscar = trim((string) $request->input('buscar'));
-                $query->where(function ($areas) use ($buscar) {
-                    $areas->where('nombre', 'like', "%{$buscar}%")
-                        ->orWhereHas('trainingcenter', function ($centros) use ($buscar) {
-                            $centros->where('nombre', 'like', "%{$buscar}%");
-                        });
-                });
-            })
-            ->orderByDesc('id');
-
-        return $this->paginated($this->applyPagination($query, $request), 'Áreas obtenidas correctamente.');
+        $areas = Area::with([
+            'trainingcenter' => function($consulta){
+                $consulta->select('id','nombre');
+            }
+        ])->get();
+        return response()->json($areas);
     }
 
     public function store(AreaRequest $request): JsonResponse
@@ -36,9 +27,18 @@ class AreaApiController extends ApiController
         return $this->created($area->load('trainingcenter'), 'Área creada correctamente.');
     }
 
-    public function show(Area $area): JsonResponse
+    public function show(int $id)
     {
-        return $this->success($area->load(['trainingcenter', 'programs']), 'Área obtenida correctamente.');
+        $area = Area::with([
+                'trainingcenter' => function ($consulta) {
+                    $consulta->select('id', 'nombre');
+                },
+                'programs' => function ($consulta) {
+                    $consulta->select('id', 'nombre','area_id');
+                }
+            ])
+            ->findOrFail($id);
+        return response()->json($area);
     }
 
     public function update(AreaRequest $request, Area $area): JsonResponse

@@ -12,6 +12,7 @@ class ResultApiController extends ApiController
 {
     public function index(Request $request): JsonResponse
     {
+        $user = $this->requireRole(['Admin', 'Instructor', 'Aprendiz']);
         $query = Result::query()
             ->with('competition')
             ->withCount('grades')
@@ -27,6 +28,21 @@ class ResultApiController extends ApiController
             })
             ->when($request->filled('competition_id'), fn ($query) => $query->where('competition_id', $request->integer('competition_id')))
             ->orderByDesc('id');
+
+        if ($user?->rol === 'Instructor') {
+            $teacher = $user->teacher;
+            $query->whereHas('competition', function ($competencies) use ($teacher) {
+                if ($teacher) {
+                    $competencies->asignadasAlInstructor($teacher);
+                } else {
+                    $competencies->whereRaw('1 = 0');
+                }
+            });
+        } elseif ($user?->rol === 'Aprendiz') {
+            $query->whereHas('grades.apprentice', function ($apprentices) use ($user) {
+                $apprentices->where('user_id', $user->id);
+            });
+        }
 
         return $this->paginated($this->applyPagination($query, $request), 'Resultados obtenidos correctamente.');
     }

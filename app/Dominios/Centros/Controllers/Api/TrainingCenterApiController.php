@@ -22,33 +22,25 @@ class TrainingCenterApiController extends ApiController
                 });
             })
             ->orderByDesc('id');
-
         return $this->paginated($this->applyPagination($query, $request), 'Centros obtenidos correctamente.');
     }
-
     public function store(TrainingcentersRequest $request): JsonResponse
     {
         $centro = Trainingcenter::create($request->validated());
-
         return $this->created($centro->loadCount(['areas', 'environments']), 'Centro creado correctamente.');
     }
-
     public function show(Trainingcenter $centro): JsonResponse
     {
         return $this->success($centro->load(['areas', 'environments']), 'Centro obtenido correctamente.');
     }
-
     public function update(TrainingcentersRequest $request, Trainingcenter $centro): JsonResponse
     {
         $centro->update($request->validated());
-
         return $this->success($centro->fresh(['areas', 'environments']), 'Centro actualizado correctamente.');
     }
-
     public function destroy(Trainingcenter $centro): JsonResponse
     {
         $centro->delete();
-
         return $this->success(null, 'Centro eliminado correctamente.');
     }
 }

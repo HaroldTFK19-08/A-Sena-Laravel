@@ -32,6 +32,7 @@ class OfferRequest extends FormRequest
             'fecha_segunda_prueba' => ['nullable', 'date', 'after:fecha_primera_prueba'],
             'fecha_seleccionados' => ['required', 'date', 'after_or_equal:fecha_segunda_prueba'],
             'imagen' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:2048'],
+            'publicada' => ['sometimes', 'boolean'],
         ];
     }
     public function messages(): array

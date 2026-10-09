@@ -10,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\PersonalAccessToken;
 
@@ -59,14 +60,45 @@ class AuthApiController extends ApiController
     public function me(Request $request): JsonResponse
     {
         $user = $this->currentUser();
-
         if (! $user) {
             return $this->success(null, 'No hay un usuario autenticado en la solicitud.');
         }
-
         $user->load(['admin', 'teacher', 'apprentice', 'aspirant']);
-
         return $this->success($user, 'Usuario autenticado.');
+    }
+
+    public function updateProfile(Request $request): JsonResponse
+    {
+        $user = $this->currentUser();
+        abort_unless($user, 401, 'Debes iniciar sesión para actualizar tu perfil.');
+
+        $data = $request->validate([
+            'nombre_1' => ['required', 'string', 'max:20'],
+            'nombre_2' => ['nullable', 'string', 'max:20'],
+            'apellido_1' => ['required', 'string', 'max:20'],
+            'apellido_2' => ['nullable', 'string', 'max:20'],
+            'tipo_identificacion' => ['required', Rule::in(['CC', 'TI', 'CE', 'PPT'])],
+            'identificacion' => ['required', 'string', 'max:255', Rule::unique('users', 'identificacion')->ignore($user->id)],
+            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+            'password_confirmation' => ['nullable', 'required_with:password', 'string', 'min:8'],
+            'foto_perfil' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:2048'],
+        ]);
+
+        if (! empty($data['password'])) {
+            $data['password'] = Hash::make($data['password']);
+        } else {
+            unset($data['password'], $data['password_confirmation']);
+        }
+
+        if ($request->hasFile('foto_perfil')) {
+            $data['foto_perfil'] = $request->file('foto_perfil')->store('photos', 'public');
+        }
+
+        unset($data['password_confirmation']);
+        $user->update($data);
+
+        return $this->success($user->fresh(), 'Perfil actualizado correctamente.');
     }
 
     public function logout(Request $request): JsonResponse
@@ -81,7 +113,6 @@ class AuthApiController extends ApiController
         }
         Auth::guard('web')->logout();
         Auth::forgetGuards();
-
         return $this->success(null, 'Sesión finalizada correctamente.');
     }
 }

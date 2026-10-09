@@ -295,6 +295,40 @@ class ApiCrudTest extends TestCase
             ->assertJsonPath('data', null);
     }
 
+    public function test_authenticated_user_can_update_own_profile_without_changing_role(): void
+    {
+        $user = User::where('email', 'api-admin@adminsena.com')->firstOrFail();
+
+        $this->withToken($this->token)
+            ->putJson(route('api.auth.profile.update'), [
+                'nombre_1' => 'Nombre',
+                'nombre_2' => null,
+                'apellido_1' => 'Actualizado',
+                'apellido_2' => null,
+                'tipo_identificacion' => 'CC',
+                'identificacion' => '900000099',
+                'email' => 'api-admin@adminsena.com',
+            ])
+            ->assertOk()
+            ->assertJsonPath('data.nombre_1', 'Nombre')
+            ->assertJsonPath('data.identificacion', '900000099')
+            ->assertJsonPath('data.rol', 'Admin');
+
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'nombre_1' => 'Nombre',
+            'apellido_1' => 'Actualizado',
+            'identificacion' => '900000099',
+            'rol' => 'Admin',
+        ]);
+    }
+
+    public function test_profile_update_requires_an_authenticated_user(): void
+    {
+        $this->putJson(route('api.auth.profile.update'), [])
+            ->assertUnauthorized();
+    }
+
     private function postResource(string $route, array $payload, bool $withToken = true): int
     {
         $response = $withToken
